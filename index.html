@@ -20,7 +20,7 @@
     --gold-soft:#d9c283;
     --line:#c9b98f;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
   html,body{margin:0;padding:0;}
   body{
     min-height:100vh;
@@ -138,6 +138,10 @@
     transition: all 0.15s ease;
   }
   .item-card:hover{ border-color: var(--seal); background: rgba(255,255,255,0.55); transform: translateY(-2px); }
+  @media (hover: none){
+    .item-card:hover{ border-color: var(--line); background: rgba(255,255,255,0.35); transform: none; }
+    .item-card:active{ border-color: var(--seal); background: rgba(255,255,255,0.55); }
+  }
   .item-letter{
     font-family:'Shippori Mincho', serif; color: var(--seal); font-weight:800; font-size:13px;
     margin-bottom: 4px; letter-spacing:0.1em;
