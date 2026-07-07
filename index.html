@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>奇縁堂 — 不思議な店主の物語</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Noto+Serif+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#1b140f;
+    --bg-deep2:#241a13;
+    --panel:#ece0c2;
+    --panel2:#e2d3ac;
+    --ink:#2b2118;
+    --ink-soft:#5a4a38;
+    --seal:#a3312a;
+    --seal-dark:#7c2420;
+    --gold:#b8912f;
+    --gold-soft:#d9c283;
+    --line:#c9b98f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 20% -10%, #33251a 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 110%, #2a1d14 0%, transparent 50%),
+      linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-deep2) 100%);
+    color: var(--ink);
+    font-family:'Noto Serif JP', serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 28px 14px;
+  }
+  #app{ width:100%; max-width: 640px; }
+
+  .scroll{
+    background: linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.55), 0 2px 0 rgba(255,255,255,0.15) inset;
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll::before, .scroll::after{
+    content:"";
+    display:block;
+    height: 14px;
+    background:
+      repeating-linear-gradient(90deg, var(--gold) 0 2px, transparent 2px 14px);
+    opacity:0.55;
+  }
+  .scroll-inner{ padding: 30px 26px 26px; }
+
+  .shop-header{
+    display:flex; align-items:baseline; justify-content:space-between;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 14px; margin-bottom: 18px;
+    gap: 10px; flex-wrap: wrap;
+  }
+  .shop-name{
+    font-family:'Shippori Mincho', serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+  .shop-name small{
+    display:block; font-family:'Noto Serif JP',serif; font-weight:500;
+    font-size: 11px; letter-spacing:0.15em; color: var(--ink-soft); margin-top:2px;
+  }
+  .seals{ display:flex; gap:6px; }
+  .seal-dot{
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--seal-dark);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 10px; color: var(--seal-dark);
+    font-family:'Shippori Mincho',serif;
+    transition: all 0.35s ease;
+  }
+  .seal-dot.filled{ background: var(--seal); color:#f4e9d0; border-color: var(--seal-dark); box-shadow:0 0 0 1px rgba(255,255,255,0.15) inset;}
+
+  .stage-label{
+    font-size: 11px; letter-spacing:0.2em; color: var(--gold); font-weight:700;
+    margin-bottom: 6px; text-transform:uppercase;
+  }
+
+  /* Title screen */
+  .title-block{ text-align:center; padding: 10px 6px 4px; }
+  .title-mark{ font-size: 42px; color: var(--seal); margin-bottom: 4px; }
+  .title-block h1{
+    font-family:'Shippori Mincho', serif; font-size: 30px; margin: 6px 0 2px; letter-spacing:0.1em;
+  }
+  .title-block .sub{ color: var(--ink-soft); font-size: 13px; margin-bottom: 20px; letter-spacing:0.05em; }
+  .lore{
+    text-align:left; background: rgba(255,255,255,0.28); border:1px solid var(--line);
+    border-radius:3px; padding: 16px 18px; font-size: 14.5px; line-height:1.9; color: var(--ink);
+    margin-bottom: 22px;
+  }
+  .lore p{ margin: 0 0 10px; }
+  .lore p:last-child{ margin-bottom:0; }
+
+  button.primary{
+    display:block; width:100%;
+    background: var(--seal); color:#f6ead2; border:none;
+    font-family:'Shippori Mincho', serif; font-weight:700; font-size:17px;
+    letter-spacing:0.15em; padding: 14px 10px; border-radius: 3px; cursor:pointer;
+    box-shadow: 0 4px 0 var(--seal-dark);
+    transition: transform 0.12s ease;
+  }
+  button.primary:active{ transform: translateY(3px); box-shadow:0 1px 0 var(--seal-dark); }
+  button.primary:hover{ filter: brightness(1.06); }
+
+  /* Guest / request */
+  .guest-tag{
+    display:inline-block; font-size:12px; letter-spacing:0.1em; color:#f6ead2;
+    background: var(--ink-soft); padding: 3px 10px; border-radius: 2px; margin-bottom:10px;
+  }
+  .guest-name{
+    font-family:'Shippori Mincho', serif; font-size: 24px; font-weight:800; margin: 0 0 12px;
+    color: var(--ink);
+  }
+  .request-box{
+    border-left: 3px solid var(--seal);
+    padding: 10px 16px; background: rgba(255,255,255,0.3);
+    font-size: 15px; line-height: 1.85; margin-bottom: 20px; color: var(--ink);
+  }
+
+  .items-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px){ .items-grid{ grid-template-columns: 1fr; } }
+  .item-card{
+    border:1px solid var(--line); background: rgba(255,255,255,0.35);
+    border-radius: 3px; padding: 14px 14px 16px; text-align:left; cursor:pointer;
+    font-family:'Noto Serif JP', serif; color: var(--ink); position:relative;
+    transition: all 0.15s ease;
+  }
+  .item-card:hover{ border-color: var(--seal); background: rgba(255,255,255,0.55); transform: translateY(-2px); }
+  .item-letter{
+    font-family:'Shippori Mincho', serif; color: var(--seal); font-weight:800; font-size:13px;
+    margin-bottom: 4px; letter-spacing:0.1em;
+  }
+  .item-name{ font-weight:700; font-size:15.5px; margin-bottom:6px; }
+  .item-desc{ font-size:12.5px; color: var(--ink-soft); line-height:1.6; }
+
+  /* Result */
+  .result-text{ font-size:15px; line-height:1.9; margin-bottom:16px; color:var(--ink); }
+  .fact-box{
+    background: rgba(43,33,24,0.06);
+    border: 1px dashed var(--gold);
+    border-radius: 3px; padding: 12px 14px; margin-bottom: 20px;
+  }
+  .fact-label{
+    font-size:11px; letter-spacing:0.15em; color: var(--gold); font-weight:700; margin-bottom:5px;
+  }
+  .fact-text{ font-size:12.5px; line-height:1.75; color: var(--ink-soft); }
+
+  .outcome-badge{
+    display:inline-block; font-size:12px; padding:3px 10px; border-radius:2px; margin-bottom:12px;
+    font-weight:700; letter-spacing:0.08em;
+  }
+  .outcome-good{ background:#3f5a3a; color:#eef4e6; }
+  .outcome-mid{ background:#8a7052; color:#f6ead2; }
+  .outcome-bad{ background:#5a2a24; color:#f4dcd6; }
+
+  .footer-note{ text-align:center; font-size:11px; color:#8a7050; margin-top: 14px; letter-spacing:0.08em;}
+
+  .ending-title{
+    font-family:'Shippori Mincho', serif; font-size: 24px; font-weight:800; text-align:center;
+    margin: 4px 0 16px;
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ===================== DATA ===================== */
+
+const CHARACTERS = [
+  {id:'kansin', name:'韓信', era:'秦末〜楚漢', fetch:'あの日の股くぐり、忘れたことはない、と韓信は静かに現れる。'},
+  {id:'shoka', name:'蕭何', era:'秦末〜楚漢', fetch:'貸し借りはきちんと返す性分でな、と蕭何は帳簿を閉じながら現れる。'},
+  {id:'koketsu', name:'勾践', era:'春秋戦国', fetch:'苦難を共にした者よ、と勾践は静かに告げる。あの日の品の苦さを、今も懐に忍ばせているという。'},
+  {id:'sonpin', name:'孫臏', era:'春秋戦国', fetch:'策を授かった恩、忘れてはおらぬ、と孫臏は杖をつきながら現れる。'},
+  {id:'kutsugen', name:'屈原', era:'春秋戦国', fetch:'あの日、川辺で拾った言葉を今も胸に、と屈原は静かに佇む。'},
+  {id:'keika', name:'荊軻', era:'秦末', fetch:'あの日の餞、忘れはせぬ、と荊軻は盃を片手に笑う。'},
+  {id:'shoou', name:'商鞅', era:'春秋戦国', fetch:'法も情も、貸し借りは正確にせねばな、と商鞅は帳面片手に現れる。'},
+  {id:'mousyoukun', name:'孟嘗君', era:'春秋戦国', fetch:'食客の一人に加えてやろう、と孟嘗君は豪快に笑う。'},
+  {id:'sosin', name:'蘇秦', era:'春秋戦国', fetch:'あの日の錐の痛み、今も覚えている、と蘇秦は懐かしそうに語る。'},
+  {id:'souji', name:'荘子', era:'春秋戦国', fetch:'夢か現か、そなたに会いに来たのかもしれぬな、と荘子は笑う。'},
+  {id:'kouu', name:'項羽', era:'秦末〜楚漢', fetch:'あの夜のこと、忘れてはおらぬ、と項羽は大きな声で笑う。'},
+  {id:'ryuuhou', name:'劉邦', era:'秦末〜楚漢', fetch:'世話になったな、と劉邦は気安く肩を叩いてくる。'},
+  {id:'chouryou', name:'張良', era:'秦末〜楚漢', fetch:'静かに礼を述べに参った、と張良は深く一礼する。'},
+  {id:'hanzou', name:'范増', era:'秦末〜楚漢', fetch:'あの夜の助言、無駄にはならなんだ、と范増は杖をついて現れる。'},
+  {id:'hankai', name:'樊噲', era:'秦末〜楚漢', fetch:'恩は忘れぬ、と樊噲は肉の匂いをさせながらやってくる。'},
+  {id:'chinpei', name:'陳平', era:'秦末〜楚漢', fetch:'貸しは返す主義でな、と陳平はにやりと笑う。'},
+  {id:'gyokuki', name:'虞姫', era:'秦末〜楚漢', fetch:'あの夜の舞、忘れませぬ、と虞姫は静かに微笑む。'},
+];
+
+// item: {name, desc, result, rep(delta), sat(delta), tier: 'good'|'mid'|'bad'}
+const EPISODES = [
+{cid:'kansin', request:'「淮陰の市場でならず者に絡まれた。『刺せるものなら刺してみろ、できねば股をくぐれ』とな。……店主、この場を凌ぎ、なお先々の大事を損なわぬ品はあるか」',
+ items:[
+  {name:'忍従の帯', desc:'締めると屈辱を静かな怒りとして腹に沈められる', rep:0, sat:1, tier:'mid',
+   result:'韓信、無言で股をくぐりきる。ならず者は拍子抜けした顔で「……なんだ、あっさりだな」とつまらなそうに立ち去る。'},
+  {name:'哄笑の仮面', desc:'被ると、どんな屈辱の場でも大声で笑い出してしまう', rep:1, sat:2, tier:'good',
+   result:'仮面のせいで大笑いしながら股をくぐる韓信に、ならず者のほうが引いて逃げていく。市場中がその笑い声にざわつく見世物になった。'},
+  {name:'雄弁の巻物', desc:'弁舌が三割増しになる', rep:-1, sat:0, tier:'bad',
+   result:'朗々と語る韓信にならず者は「賢そうに喋ってんじゃねえ」と余計に苛立ち、小突き回された上で股をくぐる羽目に。'},
+  {name:'焔霜の名刀', desc:'一太刀で決着をつけられる業物', rep:-1, sat:0, tier:'bad',
+   result:'柄に手をかけた瞬間、手が震えて抜けず、「腰抜けが刀だけ立派だな」と二重に笑われる。'},
+ ], fact:'韓信は実際に股をくぐり、後に大将軍として頭角を現したと伝わる（「胯下の辱」の故事）。'},
+
+{cid:'kansin', request:'「趙の大軍を前に、あえて川を背にして布陣する。退路なき陣で兵に死力を尽くさせたい。……店主、良い品はあるか」',
+ items:[
+  {name:'断ち切りの太鼓', desc:'退却の合図を出せなくする', rep:1, sat:2, tier:'good',
+   result:'太鼓が退却の合図を出せなくなり、兵たちは「もう戻れない」と悟った途端、目の色を変えて奮戦し始める。'},
+  {name:'逆流知らずの筏', desc:'川を渡っても流されない', rep:-1, sat:0, tier:'bad',
+   result:'筏が流されないため実質退路が残ってしまい、兵の一部が「まあ最悪泳げる」と気を抜いてしまう。'},
+  {name:'発破の狼煙玉', desc:'大きな音で敵を脅かせる', rep:-1, sat:0, tier:'bad',
+   result:'狼煙玉の轟音に自軍まで浮足立ち、統率が一瞬乱れる。'},
+  {name:'空腹しのぎの干飯', desc:'兵糧が尽きても動ける', rep:0, sat:1, tier:'mid',
+   result:'兵糧の心配がなくなった分、逆に「別に急いで勝たなくても」と緊張感がやや緩んでしまう。'},
+ ], fact:'韓信は趙軍を前に川を背にして布陣し、退路のない兵に死力を尽くさせて大勝したと伝わる（「背水の陣」）。'},
+
+{cid:'shoka', request:'「韓信が夜陰に紛れて陣を去った。今夜のうちに追いつかねば、漢は天下取りの要を永遠に失う。……店主、時は無い。何か貸してくれ」',
+ items:[
+  {name:'千里の沓', desc:'履けば夜通し疾走しても息切れしない', rep:0, sat:1, tier:'mid',
+   result:'風のように駆け抜け追いつくが、韓信に「その脚、人間ですか」と若干引かれる。'},
+  {name:'星読みの羅針', desc:'行き先を星で推測できるが時間がかかる', rep:-1, sat:0, tier:'bad',
+   result:'方角を三度間違え、消えかけた背中を叫びながら追いかける羽目に。'},
+  {name:'説き伏せの舌根', desc:'追いついた際、相手を必ず翻意させる言葉が出る', rep:-1, sat:0, tier:'bad',
+   result:'舌根が延々喋り続け、韓信は根負けして「わかりました戻ります」と折れるだけの絵面に。'},
+  {name:'陳年の酒瓶', desc:'酌み交わせば確執が水に流れる（らしい）', rep:1, sat:2, tier:'good',
+   result:'河原で回し飲みが始まり、気づけば二人して星を見ながら朝まで意気投合していた。'},
+ ], fact:'蕭何は夜通し韓信を追いかけて連れ戻し、劉邦に大将軍として推挙したと伝わる（「蕭何月下追韓信」の故事）。'},
+
+{cid:'shoka', request:'「韓信に謀反の疑いがかかっている。呂后さまの命で、韓信を宮中へおびき出さねばならぬ。……店主、良い品はあるか」',
+ items:[
+  {name:'祝勝の招待状', desc:'もっともらしい祝いの席への招待に見せかけられる', rep:1, sat:2, tier:'good',
+   result:'「祝いの席だ」と気安く誘うと、韓信はかつての信頼からあっさり応じ、疑うそぶりも見せず宮中へ足を運んでしまう。'},
+  {name:'本物の勝利の報', desc:'実際の戦勝の知らせをでっち上げられる', rep:0, sat:1, tier:'mid',
+   result:'偽の戦勝の報に韓信はやや訝しみながらも一応顔を出すが、終始どこか警戒した様子を崩さない。'},
+  {name:'疑い深さ払いの茶', desc:'飲ませると相手の警戒心が薄れる', rep:-1, sat:0, tier:'bad',
+   result:'茶を飲ませても韓信の勘の良さは衰えず、「何か企んでいるな」とかえって警戒を強められる。'},
+  {name:'逃げ足封じの鎖', desc:'密かに足枷をつけられる', rep:-1, sat:0, tier:'bad',
+   result:'足枷を仕込もうとした気配に韓信が気づき、一触即発の空気になってしまう。'},
+ ], fact:'韓信を大将軍に推挙したのも蕭何なら、後に呂后と謀って宮中へおびき寄せ誅殺させたのも蕭何だったと伝わる（「成也蕭何、敗也蕭何」）。'},
+
+{cid:'koketsu', request:'「呉に敗れ、会稽で生き恥を晒した。この屈辱、片時も忘れてはならぬ。……店主、忘れぬための品をくれ」',
+ items:[
+  {name:'苦胆の壺', desc:'舐めるたび強烈な苦味が走り、忘れかけた記憶を呼び覚ます', rep:1, sat:2, tier:'good',
+   result:'舐めるたびあまりの苦さに勾践が顔を歪め、周囲の家臣まで一緒に顔をしかめる羽目に。「これは効く」と涙目で頷く姿が妙に様になっていた。'},
+  {name:'硬藁の寝床', desc:'寝転ぶたび背中に薪が刺さり、熟睡できない', rep:0, sat:1, tier:'mid',
+   result:'毎晩背中に薪が刺さり呻きながら目を覚ます勾践。家臣が「陛下、いっそ布団を足しては」と提案するが頑として断る。'},
+  {name:'呉王の肖像扇', desc:'扇ぐたびに呉王夫差の顔が浮かび上がる', rep:-1, sat:0, tier:'bad',
+   result:'扇ぐたびに現れる夫差の顔があまりに間抜けな表情で描かれており、怒りより先に噴き出しそうになって困る勾践。'},
+  {name:'忘却の香炉', desc:'焚くと嫌な記憶がすっと薄れて楽になる', rep:-1, sat:0, tier:'bad',
+   result:'焚いた瞬間、恨みも屈辱もふわっと消えて上機嫌になってしまい、家臣一同が慌てて香炉を取り上げる。'},
+ ], fact:'勾践は薪の上に寝て苦い肝を舐め続け、屈辱を忘れぬようにし、後に呉を滅ぼしたと伝わる（「臥薪嘗胆」の由来）。'},
+
+{cid:'koketsu', request:'「呉王夫差の心を緩ませ、国政を疎かにさせたい。美女・西施を送り込む算段だが……店主、後押しする品はあるか」',
+ items:[
+  {name:'魅了の紅', desc:'つけると誰の目にも一層美しく映る', rep:1, sat:2, tier:'good',
+   result:'紅をつけた西施が夫差の前に現れると、夫差はすっかり心を奪われ、以後政務そっちのけで西施のもとへ通い詰めるようになる。'},
+  {name:'もの忘れの香', desc:'焚くと相手が政務を忘れやすくなる', rep:-1, sat:0, tier:'bad',
+   result:'香のせいで夫差の忘れっぽさが政務全般に及びすぎ、重臣たちが「近頃どうも様子がおかしい」と早々に勘づき始める。'},
+  {name:'真心の耳飾り', desc:'つけると相手の本心が自然と伝わる', rep:-1, sat:0, tier:'bad',
+   result:'耳飾りのせいで西施自身の複雑な心中まで夫差に伝わってしまい、かえって夫差が思い悩む展開に。'},
+  {name:'見破り封じの帳', desc:'かけると計略が見抜かれにくくなる', rep:0, sat:1, tier:'mid',
+   result:'計略は見抜かれにくくなるが、そのぶん西施の存在感も薄れてしまい、夫差の心をなかなか大きく動かせない。'},
+ ], fact:'勾践は美女・西施を呉王夫差に献上して国政を緩ませ、後の呉討伐への布石としたと伝わる。'},
+
+{cid:'sonpin', request:'「魏の大軍が我らを追う。竈の数を欺いて、油断を誘わねばならぬ。……店主、敵の目をたばかる品はあるか」',
+ items:[
+  {name:'縮小の竈型', desc:'本物そっくりだが本来より小さく、竈の数が少なく見える', rep:1, sat:2, tier:'good',
+   result:'日ごとに竈の数がさりげなく減っていき、追手の斥候が「随分逃げ出したものだ」と算段違いの報告を上げ、油断しきって突っ込んでくる。'},
+  {name:'誇張の狼煙', desc:'焚くと実際より何倍も大きな煙が上がる', rep:-1, sat:0, tier:'bad',
+   result:'狼煙が派手すぎて逆に「何か企んでいるぞ」と怪しまれ、追手が慎重になってしまう。'},
+  {name:'幻影の旗指物', desc:'立てるだけで兵の数が二倍に見える', rep:-1, sat:0, tier:'bad',
+   result:'幻影の旗があまりに軽くてすぐ倒れ、風が吹くたびバレそうになってヒヤヒヤする羽目に。'},
+  {name:'静音の太鼓', desc:'叩いても音がほとんど響かない', rep:0, sat:1, tier:'mid',
+   result:'太鼓が鳴らないせいで味方の士気が微妙に上がらず、行軍がだらだらと間延びする。'},
+ ], fact:'孫臏は日ごとに竈の数を減らして見せ、魏軍に味方の脱走が相次いでいると誤認させて油断を誘い、馬陵の戦いで大勝したと伝わる。'},
+
+{cid:'sonpin', request:'「魏が趙の都・邯鄲を包囲している。趙を直接救うのではなく、魏の本国を衝きたいのだが……店主、良い品はあるか」',
+ items:[
+  {name:'空き巣狙いの地図', desc:'魏の手薄な本国への近道が描かれている', rep:1, sat:2, tier:'good',
+   result:'地図通りに手薄な魏の本国へ向かうと、包囲していた魏軍が慌てて自国防衛のため兵を返し、結果的に邯鄲の包囲があっさり解ける。'},
+  {name:'急行の旗', desc:'掲げると行軍速度が上がる', rep:0, sat:1, tier:'mid',
+   result:'行軍は速まるが結局邯鄲へ直行する形になり、疲弊した味方が魏の大軍と正面からぶつかる苦しい展開に。'},
+  {name:'囮の兵糧車', desc:'目立つ位置に置くと敵の目を引きつける', rep:-1, sat:0, tier:'bad',
+   result:'囮の兵糧車が早々に見破られ、「見え透いた手だ」と魏軍にせせら笑われるだけに終わる。'},
+  {name:'邯鄲直行の早馬', desc:'邯鄲へ最速で駆けつけられる', rep:-1, sat:0, tier:'bad',
+   result:'早馬で邯鄲へ急ぐも、魏の主力とかち合ってしまい、かえって危険な鉢合わせになる。'},
+ ], fact:'孫臏は包囲された趙を直接救わず、手薄になった魏の本国を攻めることで魏軍を退かせたと伝わる（「囲魏救趙」）。'},
+
+{cid:'kutsugen', request:'「国を憂え諫言すれど聞き入れられず、追われるようにこの地に来た。……店主、この胸のうちを鎮める品はないか」',
+ items:[
+  {name:'蘭の香り袋', desc:'身につけると心が凛と静まる', rep:1, sat:2, tier:'good',
+   result:'香りを嗅いだ屈原が久々に穏やかな顔で川辺に座り込み、その場で即興の詩を口ずさみ始める。通りがかりの漁師が思わず聞き惚れて足を止める。'},
+  {name:'酔郷の瓢箪', desc:'一口飲むと悩みを忘れて陽気になる', rep:-1, sat:0, tier:'bad',
+   result:'瓢箪をあおった屈原、上機嫌で川辺で踊り出し、漁師たちに「先生、飲みすぎですぞ」と肩を貸される始末に。'},
+  {name:'千里眼の玉', desc:'遠く離れた都の様子が見える', rep:-1, sat:0, tier:'bad',
+   result:'都の様子を見た屈原、案の定ろくでもない光景に余計に憤慨し、玉を握りしめたまま黙り込んでしまう。'},
+  {name:'重石の帯', desc:'締めると体が重くなり、動きが鈍る', rep:0, sat:1, tier:'mid',
+   result:'体が重くて動けず、その場にへたり込んで愚痴をこぼし続ける屈原に、漁師が「先生、一旦座って茶でもどうです」と付き合わされる。'},
+ ], fact:'屈原は失意のうちに汨羅江に身を投げて命を絶ったと伝わり、この故事が端午節（ちまきを投げ込む風習）の由来ともされる。'},
+
+{cid:'keika', request:'「明日、秦王に会う。図の中に匕首を忍ばせ、事を為す。……店主、この覚悟にふさわしい餞（はなむけ）の品をくれ」',
+ items:[
+  {name:'震えぬ盃', desc:'注いでも中の酒が決して波立たない', rep:1, sat:2, tier:'good',
+   result:'盃を掲げても酒が微動だにせず、荊軻自身が「ほう」と感心し、見送りの高漸離が「お前のほうが肝が据わってるな」と笑って盃を打ち鳴らす。'},
+  {name:'泣き虫の笛', desc:'吹くと聞いた者が皆涙を流してしまう', rep:-1, sat:0, tier:'bad',
+   result:'高漸離の築（琴）に合わせて笛を吹いた途端、送別の一同がわんわん泣き出してしまい、荊軻が「湿っぽすぎる、やめろ」と苦笑いする羽目に。'},
+  {name:'見得切りの外套', desc:'羽織ると誰よりも堂々として見える', rep:0, sat:1, tier:'mid',
+   result:'外套のおかげで妙に堂々として見えるが、あまりに大仰で「そんな気合の入った格好で行くのか」と見送りの一人にツッコまれる。'},
+  {name:'空腹しのぎの干し肉', desc:'腹が減っても集中力が切れない', rep:-1, sat:0, tier:'bad',
+   result:'干し肉を頬張りながら盃を交わすため、どうにも締まらない絵面になり、易水の別れの空気がふにゃっと緩んでしまう。'},
+ ], fact:'荊軻は地図に匕首を忍ばせて秦王暗殺を試みたが失敗し、その場で命を落としたと伝わる（「図窮匕見」の故事）。'},
+
+{cid:'keika', request:'「秦王に近づく口実として、秦から追われる身の樊於期どのの首が要る。頼み込むしかないが……店主、何か手はあるか」',
+ items:[
+  {name:'覚悟を映す鏡', desc:'覗くと自分の本当の望みがはっきり見える', rep:1, sat:2, tier:'good',
+   result:'鏡を渡すと樊於期は自らの姿をじっと見つめ、「秦への恨みを晴らせるなら本望だ」と自ら首を差し出す覚悟を固める。'},
+  {name:'涙誘いの手巾', desc:'使うと相手の情に強く訴えられる', rep:0, sat:1, tier:'mid',
+   result:'手巾で涙ながらに訴えると樊於期も心を動かされるが、決断までにかなりの時間がかかり、荊軻は気を揉むことになる。'},
+  {name:'言い逃れの舌根', desc:'本題を濁して遠回しに頼める', rep:-1, sat:0, tier:'bad',
+   result:'遠回しな物言いに樊於期は真意を測りかね、「はっきり言ってくれ」と苛立たせてしまう。'},
+  {name:'脅しの偽文書', desc:'樊於期を脅すための偽の告発文', rep:-1, sat:0, tier:'bad',
+   result:'偽の告発文で脅そうとしたことが露見し、樊於期に「そこまでして私を利用するか」と深く失望される。'},
+ ], fact:'荊軻は秦への復讐を望む樊於期に事情を明かし、樊於期は自ら首を差し出して秦王暗殺計画に協力したと伝わる。'},
+
+{cid:'shoou', request:'「新法を敷いたが、民は誰も信じぬ。まずは信を示さねばならぬ。……店主、民の目を引く品はあるか」',
+ items:[
+  {name:'巨大な木材', desc:'都の南門に立てるとやたら目立つ', rep:0, sat:1, tier:'mid',
+   result:'ただの木材を都の南門に立てても、民は「またお上の茶番か」と遠巻きに見るだけで誰も動かない。'},
+  {name:'黄金の重り', desc:'木材にくくりつけると豪華に見える', rep:1, sat:2, tier:'good',
+   result:'木材に黄金の重りをくくりつけ「これを北門に運んだ者に十金を与える」と触れさせると、半信半疑の男が恐る恐る運び、本当に十金を渡された瞬間、周囲がどよめいて我先にと新法の噂が広まる。'},
+  {name:'呼び込みの銅鑼', desc:'打ち鳴らすと人が自然と集まってくる', rep:-1, sat:0, tier:'bad',
+   result:'銅鑼の音で人は集まるものの、ただの見世物だと思われてしまい、肝心の「信」の話まで誰も真面目に聞かない。'},
+  {name:'疑い払いの香', desc:'焚くと周囲の人々が素直な気持ちになる', rep:-1, sat:0, tier:'bad',
+   result:'香のせいで妙に素直になった民が「はいはい、なんでも信じます」と適当に頷くだけで、本当に信じたかどうかが逆にあやふやになる。'},
+ ], fact:'商鞅は木材を移した者に十金を与えて約束を守り、民の信頼を得てから新法を施行したと伝わる（「徙木の信」）。'},
+
+{cid:'shoou', request:'「政変で追われる身となり、国境の宿に逃げ込もうとしたが、自分の定めた法のせいで身分証のない者は泊められぬという。……店主、何か手はないか」',
+ items:[
+  {name:'偽の身分札', desc:'もっともらしい身分証に見せかけられる', rep:-1, sat:0, tier:'bad',
+   result:'偽の身分札を見せるが、宿の主人が「これは私が定めた様式と違う」と妙なところで律儀に見抜いてしまう。'},
+  {name:'顔隠しの頭巾', desc:'顔を隠して気づかれにくくする', rep:0, sat:1, tier:'mid',
+   result:'頭巾で顔を隠して交渉するが、声や物腰でどうも只者でないと感づかれ、結局警戒されたまま追い返される。'},
+  {name:'説得の巻物', desc:'宿の主人を言葉で説き伏せられる', rep:-1, sat:0, tier:'bad',
+   result:'説得を試みるも、宿の主人は「法を破れというのか」とかえって頑なになる。'},
+  {name:'銀の重り袋', desc:'宿代を弾んで融通を利かせる', rep:1, sat:2, tier:'good',
+   result:'銀を積んでみるが、宿の主人は「陛下の定めた法ゆえ、これだけは曲げられませぬ」ときっぱり固辞し、商鞅は自分の作った法の厳格さに苦笑いするしかなくなる。'},
+ ], fact:'追われる身となった商鞅は自らの定めた法のために宿を借りることもできず、「作った法に自分がはめられる」皮肉な結末を迎えたと伝わる（「作法自弊」）。'},
+
+{cid:'mousyoukun', request:'「秦から脱するには函谷関を夜のうちに抜けねばならぬ。だが門は鶏が鳴くまで開かぬ。……店主、この窮地を救う品はあるか」',
+ items:[
+  {name:'鶏声の笛', desc:'吹くと本物そっくりの鶏の鳴き声が響く', rep:1, sat:2, tier:'good',
+   result:'笛を吹いた途端、あたりの本物の鶏まで釣られて一斉に鳴き出し、寝ぼけ眼の門番が「もう朝か」と何の疑いもなく関を開けてしまう。'},
+  {name:'忍び装束', desc:'着ると気配を殺して城壁をよじ登れる', rep:-1, sat:0, tier:'bad',
+   result:'忍び装束で城壁をよじ登ろうとするが、供の一人が滑り落ちて盛大な物音を立て、あわや騒ぎになりかける。'},
+  {name:'賄賂用の宝玉', desc:'門番の目の色を変えるほどの輝きを持つ', rep:0, sat:1, tier:'mid',
+   result:'宝玉を見せて交渉するが、門番が「鶏が鳴くまでは絶対に開けるな」と厳命されているの一点張りで押し切られ、結局鶏が鳴くのを待つしかなくなる。'},
+  {name:'眠り香の香炉', desc:'焚くと門番一帯がぐっすり眠り込む', rep:-1, sat:0, tier:'bad',
+   result:'眠り香で門番一帯を眠らせるが、門を開ける係の門番まで眠ってしまい、鍵を探して右往左往する羽目になる。'},
+ ], fact:'孟嘗君の食客の一人が鶏の鳴き真似をして門番を欺き、函谷関を無事脱出したと伝わる（「鶏鳴狗盗」の故事）。'},
+
+{cid:'mousyoukun', request:'「食客の馮驩が『賢い兎は隠れ穴を三つ持つ』と言い、封地の安泰のためあと二つ拠り所を作れという。……店主、その材料になる品はあるか」',
+ items:[
+  {name:'借金帳消しの証文', desc:'民の借金を帳消しにできる証文', rep:1, sat:2, tier:'good',
+   result:'証文で薛の民の借金を帳消しにすると、民は歓喜して孟嘗君を慕い、いざという時に領地ごと支える強固な足場になる。'},
+  {name:'縁結びの盃', desc:'他国の有力者と誼を結べる盃', rep:0, sat:1, tier:'mid',
+   result:'他国の有力者との誼はできるが、いざという時どこまで頼れるかは五分五分の心許ない関係にとどまる。'},
+  {name:'神殿建立の設計図', desc:'宗廟を建てて権威の拠り所にできる', rep:-1, sat:0, tier:'bad',
+   result:'神殿の建立に思いのほか時間と費用がかかり、肝心の「もう一つの拠り所」作りが後手に回ってしまう。'},
+  {name:'蓄財の壺', desc:'ひたすら財を蓄えられる壺', rep:-1, sat:0, tier:'bad',
+   result:'財を蓄えるばかりで民心も他国との誼も深まらず、いざという時に頼れる先がないまま孤立してしまう。'},
+ ], fact:'孟嘗君は食客・馮驩の計により薛の民の借金を帳消しにするなど複数の拠り所を築き、地位の安泰を図ったと伝わる（「狡兔三窟」）。'},
+
+{cid:'sosin', request:'「諸国を説いて回ったが相手にされず、無一文で郷里に戻った。このままでは学びが足りぬ。……店主、眠気を払う品をくれ」',
+ items:[
+  {name:'尖り錐', desc:'太ももに刺すと強烈な痛みで目が覚める', rep:1, sat:2, tier:'good',
+   result:'うとうとするたび太ももに錐を刺し、「痛っ！」と飛び起きては書物に向かう蘇秦を見て、家族が「あれで正気か」と半ば呆れながらも夜通し灯りを絶やさなくなる。'},
+  {name:'苦味の茶', desc:'飲むと目が冴えて眠気が飛ぶ', rep:0, sat:1, tier:'mid',
+   result:'茶のおかげで目は冴えるが、飲みすぎて何度も厠に立つことになり、集中力がぶつぶつ途切れる。'},
+  {name:'高笑いの鈴', desc:'鳴らすと自分の笑い声が響いて眠気を誤魔化せる', rep:-1, sat:0, tier:'bad',
+   result:'夜中に一人で高笑いする蘇秦に、家族が「兄さん、とうとうおかしくなった」と本気で心配し始める。'},
+  {name:'ふかふかの枕', desc:'この上なく寝心地が良い', rep:-1, sat:0, tier:'bad',
+   result:'枕のあまりの寝心地の良さに、気づけば朝まで熟睡してしまい、書物は開いたまま埃をかぶる。'},
+ ], fact:'蘇秦は錐で自分の腿を刺して眠気を払い勉学に励んだと伝わる（「刺股」の故事）。'},
+
+{cid:'sosin', request:'「六国の宰相を兼ね、故郷に錦を飾ることになった。かつて自分を鼻であしらった家族が、今度はひれ伏さんばかりに出迎えるという。……店主、この複雑な気分に効く品はあるか」',
+ items:[
+  {name:'澄まし顔の面', desc:'被ると平静を装った顔になる', rep:1, sat:2, tier:'good',
+   result:'澄まし顔で家族の前に立つと、家族はますます恐縮してひれ伏し、蘇秦は内心の複雑さを面の下に隠したまま満足げに一部始終を眺める。'},
+  {name:'皮肉交じりの扇', desc:'扇ぐと自然と皮肉めいた台詞が口を突く', rep:-1, sat:0, tier:'bad',
+   result:'扇ぐたびに「以前とは随分態度が違いますね」と皮肉が口を突いて出てしまい、家族が気まずそうに縮こまる空気になる。'},
+  {name:'昔語りの杯', desc:'飲むと昔のことをしみじみ語りたくなる', rep:0, sat:1, tier:'mid',
+   result:'杯を傾けながら昔語りを始めると、しんみりした空気になりすぎて、錦を飾る場が妙にしめやかな会になってしまう。'},
+  {name:'太っ腹の金袋', desc:'気前よく振る舞える金子', rep:-1, sat:0, tier:'bad',
+   result:'気前よく金子を配ると、家族は再び態度を変えて金目当てにすり寄ってくるばかりで、蘇秦は苦笑いするしかなくなる。'},
+ ], fact:'蘇秦が落ちぶれていた頃は見向きもしなかった家族が、六国の宰相となって帰郷した際にはひれ伏さんばかりに出迎えたと伝わる（「前倨後恭」）。'},
+
+{cid:'souji', request:'「昨夜、蝶になった夢を見た。目覚めても、自分が人間なのか、蝶が見ている夢なのか分からぬ。……店主、はっきりさせる品はあるか」',
+ items:[
+  {name:'覚醒の鈴', desc:'鳴らすと今が夢か現かがはっきり分かる', rep:-1, sat:0, tier:'bad',
+   result:'鈴を鳴らすと「これは現である」とはっきり分かってしまい、荘子は途端につまらなそうな顔をして「そういうことを聞いていたのではない」と鈴を返してくる。'},
+  {name:'混濁の酒', desc:'飲むと夢と現の境目がさらに曖昧になる', rep:1, sat:2, tier:'good',
+   result:'酒を飲んだ荘子、ますます夢と現の境が曖昧になったと上機嫌で笑い出し、「これでいい、これでいいのだ」と一人納得してふらふら帰っていく。'},
+  {name:'蝶の羽根', desc:'身につけると本当に少し飛べるようになる', rep:0, sat:1, tier:'mid',
+   result:'本当に少し体が浮くものの、羽ばたきがぎこちなくて壁にぶつかりそうになり、「蝶というのは思ったより難しいものだな」とぼやく。'},
+  {name:'何もしない石', desc:'触っても特に何も起こらない', rep:-1, sat:0, tier:'bad',
+   result:'石をじっと見つめる荘子、「何も起こらぬというのも、それはそれで一つの答えかもしれぬ」と妙な方向に納得し始め、店主が置いてけぼりになる。'},
+ ], fact:'荘子は夢で胡蝶になった話を「胡蝶の夢」として『荘子』斉物論篇に記し、物事の境界の曖昧さを説いたと伝わる。'},
+
+{cid:'souji', request:'「妻が亡くなった。友が弔いに訪れたが、自分は盆を叩いて歌っている。……店主、この心持ちに合う品はあるか」',
+ items:[
+  {name:'拍子外れの盆', desc:'叩くとどこか間の抜けた音が響く', rep:1, sat:2, tier:'good',
+   result:'間の抜けた音の盆を叩きながら朗々と歌う荘子の姿に、弔問に来た友はあきれ顔をしつつも、次第にその飄々とした態度につられて肩の力を抜いていく。'},
+  {name:'涙誘いの太鼓', desc:'叩くと悲しみが強く込み上げる', rep:-1, sat:0, tier:'bad',
+   result:'太鼓を叩いた途端、こらえていた悲しみが一気に込み上げてしまい、歌うどころではなく涙が止まらなくなる。'},
+  {name:'静寂の鈴', desc:'鳴らすとあたりが静まり返る', rep:0, sat:1, tier:'mid',
+   result:'あたりが静まり返り、荘子は言葉少なに座り込むだけで、友との会話もどこかぎこちなく途切れがちになる。'},
+  {name:'何も鳴らない盆', desc:'叩いても音がしない', rep:-1, sat:0, tier:'bad',
+   result:'音の鳴らない盆を叩き続ける姿はただただ物悲しく、弔問客のほうが気まずくなって早々に退散してしまう。'},
+ ], fact:'荘子は妻の死に際し、悲しむどころか盆を叩いて歌い、生死を巡る自然の理を説いたと伝わる（「鼓盆而歌」）。'},
+
+{cid:'kouu', request:'「鉅鹿にて秦の大軍と雌雄を決する。渡り終えた舟と兵糧の釜、どうにか兵を退けぬ覚悟にせねばならぬ。……店主、良い品はあるか」',
+ items:[
+  {name:'底抜けの甕', desc:'使うと釜が二度と使い物にならなくなる', rep:1, sat:2, tier:'good',
+   result:'兵たちが覗き込んだ釜の底に大穴が開いているのを見て一瞬青ざめるが、「飯が炊けぬなら勝つしかないな」と誰かが笑い出し、妙な団結の空気が広がる。'},
+  {name:'沈まぬ舟の護符', desc:'舟が決して沈まないよう守ってくれる', rep:-1, sat:0, tier:'bad',
+   result:'舟が沈まないため退路が残ってしまい、兵たちは「まあ最悪逃げられるな」とどこか余裕の表情のまま出陣することになる。'},
+  {name:'発破の火薬玉', desc:'投げ込むと大きな爆発音と煙が上がる', rep:-1, sat:0, tier:'bad',
+   result:'爆発音に驚いた兵たちが浮き足立ち、士気高揚どころか一時陣中が騒然とする。'},
+  {name:'千切れない綱', desc:'舟を岸にしっかり固定できる', rep:0, sat:1, tier:'mid',
+   result:'綱で固定された舟が沈められず、項羽自ら斧を振るって一隻ずつ叩き壊す羽目になり、思いのほか体力を消耗する。'},
+ ], fact:'項羽は渡河後、舟を沈め釜を壊し兵糧三日分だけを残して決死の覚悟を示し、鉅鹿の戦いで秦軍を大破したと伝わる（「破釜沈舟」）。'},
+
+{cid:'kouu', request:'「垓下にて漢軍に幾重にも囲まれた。夜、四方から楚の歌が聞こえてくる。将兵の心が乱れていくのが分かる。……店主、何か力を貸してくれ」',
+ items:[
+  {name:'耳塞ぎの綿', desc:'耳に詰めると外の音が一切聞こえなくなる', rep:1, sat:2, tier:'good',
+   result:'兵たちが耳を塞いで静かに休む中、項羽だけは耳を塞がず歌に耳を澄ませ、静かな帳の中で虞姫と二人、穏やかに杯を交わす時間が生まれる。'},
+  {name:'太鼓の応戦', desc:'打ち鳴らして楚歌に対抗できる', rep:-1, sat:0, tier:'bad',
+   result:'太鼓で対抗しようとするが、楚歌のあまりの切なさに叩いている兵士自身が涙ぐんでしまい、かえって逆効果になる。'},
+  {name:'望郷払いの香', desc:'焚くと望郷の念が薄れる', rep:-1, sat:0, tier:'bad',
+   result:'香で望郷の念は薄れるものの、同時に故郷を思う気力そのものが失せてしまい、兵たちがぼんやりと覇気をなくしていく。'},
+  {name:'酒瓶ひとそろい', desc:'気を紛らわせる酒', rep:0, sat:1, tier:'mid',
+   result:'酒を酌み交わして多少は気が紛れるが、酔いが回るほど歌の切なさが染み入り、余計に涙を誘う夜になる。'},
+ ], fact:'垓下で漢軍が四方から楚の歌を歌わせ、項羽軍の兵士たちは望郷の念にかられて次々と戦意を失ったと伝わる（「四面楚歌」）。'},
+
+{cid:'kouu', request:'「垓下から落ち延び、烏江のほとりまで来た。渡し守が舟を用意して待っているが、江東の父老に合わせる顔がない。……店主、最後にどうするか」',
+ items:[
+  {name:'乗り込む勇気の杖', desc:'支えにすると迷わず舟に乗り込める', rep:-1, sat:0, tier:'bad',
+   result:'杖を頼りに舟へ足を向けかけるも、江東の父老の顔が頭をよぎり、結局途中で足を止めて動けなくなる。'},
+  {name:'名馬への贈り物の鞍', desc:'愛馬にふさわしい立派な鞍', rep:1, sat:2, tier:'good',
+   result:'愛馬にふさわしい鞍を整え、渡し守に「この馬だけは頼む」と託すと、渡し守は涙ぐみながら固く頷き、その様子に項羽もわずかに口元を緩める。'},
+  {name:'最後の一戦の槍', desc:'もう一度存分に戦える槍', rep:0, sat:1, tier:'mid',
+   result:'槍を手に取り最後の一戦を挑むが、多勢に無勢でただただ体力を消耗するだけの、長く苦しい戦いになる。'},
+  {name:'沈黙の酒瓶', desc:'飲むと何も語らず静かになれる', rep:-1, sat:0, tier:'bad',
+   result:'黙って酒を飲み干すだけで誰とも言葉を交わさず、渡し守はどうしたものかと困り果てて立ち尽くす。'},
+ ], fact:'項羽は烏江のほとりで渡し守に愛馬・騅を託した後、江東の父老に合わせる顔がないとして自ら命を絶ったと伝わる。'},
+
+{cid:'ryuuhou', request:'「項羽の陣、鴻門での宴に招かれた。范増はどうやら自分を討つ気配がある。……店主、この場を無事に切り抜ける品はないか」',
+ items:[
+  {name:'早足の草履', desc:'履くと人目を盗んですぐに立ち去れる', rep:1, sat:2, tier:'good',
+   result:'厠に行くふりをしてこっそり抜け出し、そのまま馬に飛び乗って陣を後にする。宴の席では「随分長い厠だな」と気づかれるまでにしばらくかかった。'},
+  {name:'酔い潰れの丸薬', desc:'飲むと完璧に酔ったふりができる', rep:-1, sat:0, tier:'bad',
+   result:'酔ったふりがあまりに下手でかえって不自然になり、范増に「白々しい」と鋭く睨まれて冷や汗をかく羽目に。'},
+  {name:'忠犬の腕輪', desc:'つけると護衛が異様な忠誠心で守ってくれる', rep:0, sat:1, tier:'mid',
+   result:'護衛が過剰に忠誠を発揮して周囲を威嚇し始め、宴の空気がやたら張り詰めたものになってしまう。'},
+  {name:'玉玦そっくりの偽物', desc:'范増の合図の玉玦にそっくりな偽物', rep:-1, sat:0, tier:'bad',
+   result:'偽の玉玦を出したことがすぐにバレて余計に怪しまれ、范増の視線が一層鋭くなる。'},
+ ], fact:'鴻門の会で劉邦は危険を察知し、厠に行くと偽って宴席を抜け出し、間道を通って自陣へ逃げ帰ったと伝わる。'},
+
+{cid:'ryuuhou', request:'「秦の都・咸陽に入城した。厳しい秦の法に代えて、民の心を掴む新しい取り決めを示さねばならぬ。……店主、何かないか」',
+ items:[
+  {name:'簡潔な木簡', desc:'短い言葉ほど強く民の心に響く', rep:1, sat:2, tier:'good',
+   result:'「殺人・傷害・盗みの三つだけを罰する」という簡潔な取り決めを木簡に記して掲げると、民は「たったそれだけか」と驚きつつその分かりやすさに安堵し、噂はまたたく間に広がっていく。'},
+  {name:'豪華な布告文', desc:'長々と美辞麗句を連ねられる', rep:-1, sat:0, tier:'bad',
+   result:'美辞麗句を並べた布告文はあまりに長く、誰も最後まで読まずに立ち去ってしまう。'},
+  {name:'太鼓と銅鑼', desc:'布告を派手に触れ回れる', rep:0, sat:1, tier:'mid',
+   result:'太鼓と銅鑼で派手に触れ回るが、内容より音のうるささのほうが印象に残り、肝心の中身は聞き流されがちになる。'},
+  {name:'金一封の袋', desc:'民に配って歓心を買える', rep:-1, sat:0, tier:'bad',
+   result:'金を配ると一時は喜ばれるが、「金目当てで擦り寄る民」ばかり集まってしまい、肝心の信頼にはつながらない。'},
+ ], fact:'劉邦は咸陽入城後、秦の煩雑な法を廃し「殺人・傷害・窃盗のみを罰する」という簡潔な三条の約束（約法三章）を示し、民の支持を得たと伝わる。'},
+
+{cid:'ryuuhou', request:'「夜道を行く途中、大蛇が道をふさいでいる。人足たちは恐れて進めぬという。……店主、この場を切り抜ける品はあるか」',
+ items:[
+  {name:'よく斬れる剣', desc:'一振りで大蛇を斬り伏せられる', rep:1, sat:2, tier:'good',
+   result:'酔いに任せて剣を一閃すると、大蛇はあっさり両断されて道の脇に転がる。人足たちは呆気にとられつつも「大した御方だ」と気を取り直して先を急ぐ。'},
+  {name:'迂回の松明', desc:'灯りで別の道を探せる', rep:0, sat:1, tier:'mid',
+   result:'迂回路を探すのに手間取り、一行は予定より大幅に遅れて目的地に着くことになる。'},
+  {name:'蛇避けの香', desc:'焚くと蛇が自ら道を空ける', rep:-1, sat:0, tier:'bad',
+   result:'香を焚くも蛇はぴくりとも動かず、「効かないではないか」と人足たちの間に気まずい空気が流れる。'},
+  {name:'度胸試しの酒', desc:'飲むと恐怖心が薄れる', rep:-1, sat:0, tier:'bad',
+   result:'酒に酔った勢いで大声を上げるばかりで肝心の蛇には近づけず、人足たちの不安がかえって募る。'},
+ ], fact:'劉邦は夜道で大蛇を斬り捨てたと伝わり、この逸話は後に彼が天命を受けた者であることを示す話として語り継がれた（「斬白蛇起義」）。'},
+
+{cid:'chouryou', request:'「橋の上で見知らぬ老人に沓を落とされ、『拾ってこい』と横柄に言われた。腹が立つが、只者ではない気配もする。……店主、どうしたものか」',
+ items:[
+  {name:'我慢比べの座布団', desc:'座ると苛立ちを顔に出さずにいられる', rep:1, sat:2, tier:'good',
+   result:'苛立ちを表に出さず黙って橋の下まで沓を拾いに行き、さらに「履かせろ」と言われても顔色一つ変えずひざまずいて履かせる。老人は満足げに笑い、何かを見定めた様子で立ち去っていく。'},
+  {name:'素早い拾い上げ手袋', desc:'手を汚さず瞬時に物を拾える', rep:0, sat:1, tier:'mid',
+   result:'瞬時に拾い上げるが、あまりの素早さに老人が「せっかちな奴だ」とやや不満げな顔をする。'},
+  {name:'言い返しの舌根', desc:'理不尽には即座に言い返せるようになる', rep:-1, sat:0, tier:'bad',
+   result:'理不尽さに思わず言い返してしまい、老人は「見込み違いだったか」とさっさと立ち去ってしまう。'},
+  {name:'投げ返しの力持ち腕輪', desc:'履を勢いよく投げ返せるほどの腕力になる', rep:-1, sat:0, tier:'bad',
+   result:'履を勢いよく投げ返してしまい、老人の額に当たって「無礼者め」と本気で怒鳴られる。'},
+ ], fact:'張良は橋の上で老人（黄石公）に何度も沓を拾わせられ、その忍耐を認められて兵法の書を授けられたと伝わる（「圯上の履」）。'},
+
+{cid:'chouryou', request:'「秦始皇帝の行列が博浪沙を通る。この機を逃さず、力自慢の男に鉄槌を投げさせ仕留めたいのだが……店主、良い品はあるか」',
+ items:[
+  {name:'大鉄槌', desc:'力自慢の男が振るうにふさわしい重さの槌', rep:-1, sat:0, tier:'bad',
+   result:'力任せに投げた槌は的を外れて副車を粉砕するだけに終わり、肝心の始皇帝の車は素通りしてしまう。'},
+  {name:'見分けの単眼鏡', desc:'本物の始皇帝の乗る車を見分けられる', rep:1, sat:2, tier:'good',
+   result:'単眼鏡でよくよく見極めると、始皇帝の車列があまりに巧妙に偽装されていると気づき、無理に決行せず一旦身を引く判断ができ、韓成たちと共に無事に姿をくらませることができた。'},
+  {name:'逃げ足の沓', desc:'しくじった際に素早く逃げられる', rep:-1, sat:0, tier:'bad',
+   result:'逃げ足を気にするあまり肝心の狙いが定まらず、槌を投げるタイミングを逃してしまい、そのまま行列をやり過ごすことになる。'},
+  {name:'度胸づけの酒', desc:'大役を前にした緊張をほぐせる', rep:0, sat:1, tier:'mid',
+   result:'酒で緊張はほぐれるが狙いも大雑把になり、結局副車を打ち砕くだけで終わる、これまでの言い伝え通りの顛末になる。'},
+ ], fact:'張良は力自慢の男に鉄槌を投げさせ博浪沙で始皇帝暗殺を図ったが、副車を誤って撃ち、本人を仕留め損なったと伝わる。'},
+
+{cid:'hanzou', request:'「宴の最中、項羽になかなか劉邦を討つ決断をさせられぬ。腰の玉玦を掲げて合図を送っているのだが……店主、もっと分かりやすく伝える品はないか」',
+ items:[
+  {name:'大きな鈴付きの玉玦', desc:'掲げると鈴の音が響き渡る', rep:-1, sat:0, tier:'bad',
+   result:'鈴の音に宴席中の視線が集まってしまい、逆に「何の合図だ」と怪しまれ、場が一瞬凍りつく。'},
+  {name:'光る玉玦', desc:'掲げると強い光を放つ', rep:0, sat:1, tier:'mid',
+   result:'光ってはいるものの、項羽は宴の話に夢中で気づかず、光は虚しく壁を照らすだけに終わる。'},
+  {name:'目配せ増幅の眼鏡', desc:'眼力が強調されて伝わる', rep:-1, sat:0, tier:'bad',
+   result:'眼力を強調しすぎて、ただ范増が異様な形相で睨んでいるようにしか見えず、周囲がざわつく。'},
+  {name:'代筆の耳打ち文', desc:'こっそり耳打ちできる短い文', rep:1, sat:2, tier:'good',
+   result:'こっそり耳打ちすると項羽は一瞬眉を動かすが、結局「まあ良い、酒でも飲め」とはぐらかされ、范増は一人歯噛みしながらも次の機を静かにうかがうことにする。'},
+ ], fact:'鴻門の会で范増は玉玦を何度も掲げて劉邦を討つよう項羽に合図したが、項羽はついに決断せず、劉邦を討ち損ねたと伝わる。'},
+
+{cid:'hankai', request:'「宴の中で劉邦の身が危うい。盾を手に押し入り、項羽の前で睨みを利かせたいのだが……店主、力を貸してくれ」',
+ items:[
+  {name:'巨大な盾', desc:'掲げるとひときわ目立ち威圧感が増す', rep:1, sat:2, tier:'good',
+   result:'巨大な盾を叩きつけるように陣幕を押し破って現れた樊噲に、居並ぶ将たちがぎょっと息を呑む。項羽も思わず「壮士だ」と唸り、酒と生肉を振る舞う流れになる。'},
+  {name:'生肉と大杯', desc:'見せつけるように豪快に食い尽くせる', rep:0, sat:1, tier:'mid',
+   result:'生肉と大杯を豪快に平らげてみせるが、あまりの健啖ぶりに宴席が食事の品評会のような空気になり、肝心の緊迫感が薄れてしまう。'},
+  {name:'静かな足運びの沓', desc:'音を立てずに忍び込める', rep:-1, sat:0, tier:'bad',
+   result:'音を立てずに忍び込んだものの、こっそりしすぎて誰にも気づかれず、結局改めて大声を出す羽目になる。'},
+  {name:'弁舌の巻物', desc:'理路整然と抗議を述べられる', rep:-1, sat:0, tier:'bad',
+   result:'理路整然と抗議するが、酒の入った宴席では誰も真面目に取り合わず、「まあまあ」と受け流されてしまう。'},
+ ], fact:'樊噲は盾を手に強引に宴席へ押し入り、項羽の前で堂々と抗議したことで場の空気を変え、劉邦が逃れる時間を稼いだと伝わる。'},
+
+{cid:'chinpei', request:'「項羽陣営の范増と諸将の仲を裂きたい。噂を巧みに流し、内側から崩したいのだが……店主、良い品はあるか」',
+ items:[
+  {name:'偽手紙のひとそろい', desc:'もっともらしい筆跡で偽の密書を作れる', rep:1, sat:2, tier:'good',
+   result:'「范増が漢と内通している」とにおわせる偽の手紙をわざと項羽の使者の目に触れさせると、疑心暗鬼になった項羽が范増への態度を急に硬くする。'},
+  {name:'噂ばら撒きの鳩', desc:'放つと勝手に噂を運んでくれる', rep:-1, sat:0, tier:'bad',
+   result:'鳩が運ぶ噂があまりに支離滅裂に伝わってしまい、誰も真に受けず単なる与太話として消えていく。'},
+  {name:'豪華すぎる使者の膳', desc:'使者をもてなしすぎて怪しまれる', rep:-1, sat:0, tier:'bad',
+   result:'使者を豪華にもてなしすぎて、逆に「何か企んでいるな」と使者本人に警戒され、報告が慎重になってしまう。'},
+  {name:'質素すぎる使者の膳', desc:'使者を冷遇して怪しませる', rep:0, sat:1, tier:'mid',
+   result:'質素な膳でわざと冷遇してみせると使者は気分を害するが、疑念は范増個人にまでは向かず、効果は限定的に終わる。'},
+ ], fact:'陳平は項羽陣営に偽情報を流す反間の計を用い、項羽に范増を疑わせて実質的な失脚に追い込んだと伝わる。'},
+
+{cid:'chinpei', request:'「村の祭りで肉を切り分ける役を任された。皆が満足するよう、公平に配らねばならぬ。……店主、良い品はあるか」',
+ items:[
+  {name:'目盛り入りの秤', desc:'寸分違わず量って切り分けられる', rep:1, sat:2, tier:'good',
+   result:'秤で寸分違わず切り分けると、老若男女誰からも文句が出ず、村の長老が「これは大したものだ、いずれ天下を治める分配もできよう」と感心して唸る。'},
+  {name:'くじ引きの竹片', desc:'くじ引きで順番と分け前を決められる', rep:0, sat:1, tier:'mid',
+   result:'くじ引きで順番を決めると公平ではあるものの、運に左右される仕組みに一部から「もっと働きに応じて分けてほしい」と不満の声が漏れる。'},
+  {name:'大皿ひとつ', desc:'皆で好きなだけ取り合える大皿', rep:-1, sat:0, tier:'bad',
+   result:'大皿にすると力の強い者から取っていってしまい、年寄りや子供の分が足りなくなって揉め事が起きる。'},
+  {name:'味付けの壺', desc:'味を均一にできる調味料', rep:-1, sat:0, tier:'bad',
+   result:'味付けにばかり気を取られて肝心の量の配分がおろそかになり、味は良いが不公平だと苦情が相次ぐ。'},
+ ], fact:'陳平は若い頃、村の祭りで肉を見事公平に切り分け、「もし天下を治めることがあれば、この肉を分けたように公平にするだろう」と評されたと伝わる。'},
+
+{cid:'gyokuki', request:'「垓下、四方から楚の歌が聞こえる夜。項羽さまが剣を手に舞い、涙を流しておられる。……店主、この最後の夜に何か持たせてはくれないか」',
+ items:[
+  {name:'共に舞う羽衣', desc:'まとうと項羽の剣舞に合わせて美しく舞える', rep:1, sat:2, tier:'good',
+   result:'羽衣をまとって項羽の剣舞に合わせて静かに舞う虞姫に、陣中の兵たちまで思わず涙を拭いながら見入ってしまい、悲壮な夜がわずかに華やいだものになる。'},
+  {name:'涙止めの薬', desc:'飲むと涙が止まり気丈に振る舞える', rep:-1, sat:0, tier:'bad',
+   result:'涙が止まったせいで表情が硬くなり、気丈というより無表情に見えてしまい、項羽が心配そうに顔を覗き込んでくる。'},
+  {name:'逃げ道の地図', desc:'密かに脱出できる道が描かれている', rep:-1, sat:0, tier:'bad',
+   result:'地図を見せても虞姫は静かに首を横に振り、受け取らずにそっと店主へ返してしまう。使われないままの一枚になる。'},
+  {name:'変わらぬ音色の琴', desc:'弾くといつも通りの穏やかな音色が響く', rep:0, sat:1, tier:'mid',
+   result:'いつも通りの音色で琴を弾くが、その「いつも通り」さがかえって二人の間に言葉にならない静けさを生む。'},
+ ], fact:'垓下の夜、項羽は虞姫を前に別れの詩を詠み、虞姫はそれに和して舞ったのち自ら命を絶ったとも伝わる（「覇王別姫」）。'},
+];
+
+/* ===================== GAME STATE ===================== */
+let state = null;
+
+function newGame(){
+  const pool = [...CHARACTERS];
+  shuffle(pool);
+  const chosenChars = pool.slice(0,5);
+  const rounds = chosenChars.map(c=>{
+    const eps = EPISODES.filter(e=>e.cid===c.id);
+    const ep = eps[Math.floor(Math.random()*eps.length)];
+    return {char:c, ep};
+  });
+  state = {
+    rep: 2,
+    round: 0,
+    rounds: rounds,
+    satisfaction: {}, // cid -> value
+    ended: false,
+  };
+  chosenChars.forEach(c=>state.satisfaction[c.id]=0);
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}
+
+/* ===================== RENDER ===================== */
+const app = document.getElementById('app');
+
+function sealsHTML(rep){
+  let html = '<div class="seals">';
+  for(let i=1;i<=5;i++){
+    html += `<div class="seal-dot ${i<=rep?'filled':''}">印</div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function shopHeaderHTML(rep){
+  return `<div class="shop-header">
+    <div class="shop-name">奇縁堂<small>KIEN-DŌ — 仙界の骨董店</small></div>
+    ${sealsHTML(rep)}
+  </div>`;
+}
+
+function renderTitle(){
+  app.innerHTML = `
+  <div class="scroll"><div class="scroll-inner">
+    <div class="title-block">
+      <div class="title-mark">印</div>
+      <h1>奇縁堂</h1>
+      <div class="sub">— 春秋戦国・楚漢の世を渡り歩く、不思議な店の物語 —</div>
+      <div class="lore">
+        <p>ここは、仙界からこの世に降ろされた見習い店主が営む、ちいさな骨董店「奇縁堂」。</p>
+        <p>店には時おり、歴史に名を残す偉人たちが、それぞれの悩みや窮地を抱えてふらりと訪れる。あなたは棚の中から品を一つ選び、その手に渡す。</p>
+        <p>品がもたらす顛末しだいで、店の評判は上下する。評判が尽きれば、修行は失敗に終わり仙界へ連れ戻されてしまう。5人の客を迎えたのち、もっとも心を動かされた客があなたを迎えに来るだろう。</p>
+      </div>
+    </div>
+    <button class="primary" onclick="startGame()">店を開ける</button>
+  </div></div>`;
+}
+
+function renderRound(){
+  const r = state.rounds[state.round];
+  app.innerHTML = `
+  <div class="scroll"><div class="scroll-inner">
+    ${shopHeaderHTML(state.rep)}
+    <div class="stage-label">来客 ${state.round+1} / 5</div>
+    <div class="guest-tag">${r.char.era}</div>
+    <div class="guest-name">${r.char.name}</div>
+    <div class="request-box">${r.ep.request}</div>
+    <div class="items-grid">
+      ${r.ep.items.map((it,idx)=>`
+        <div class="item-card" onclick="chooseItem(${idx})">
+          <div class="item-letter">${String.fromCharCode(65+idx)}</div>
+          <div class="item-name">${it.name}</div>
+          <div class="item-desc">${it.desc}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div></div>`;
+}
+
+function renderResult(idx){
+  const r = state.rounds[state.round];
+  const it = r.ep.items[idx];
+  const badgeClass = it.tier==='good'?'outcome-good':(it.tier==='mid'?'outcome-mid':'outcome-bad');
+  const badgeText = it.tier==='good'?'客は満足げだった':(it.tier==='mid'?'まずまずの反応':'客はいまひとつだった');
+  app.innerHTML = `
+  <div class="scroll"><div class="scroll-inner">
+    ${shopHeaderHTML(state.rep)}
+    <div class="stage-label">来客 ${state.round+1} / 5 — ${r.char.name}</div>
+    <span class="outcome-badge ${badgeClass}">${badgeText}</span>
+    <div class="result-text">${it.result}</div>
+    <div class="fact-box">
+      <div class="fact-label">史実のかけら</div>
+      <div class="fact-text">${r.ep.fact}</div>
+    </div>
+    <button class="primary" onclick="proceedAfterResult()">次へ</button>
+  </div></div>`;
+}
+
+function renderGameOver(){
+  const lastChar = state.rounds[state.round].char.name;
+  app.innerHTML = `
+  <div class="scroll"><div class="scroll-inner">
+    ${shopHeaderHTML(0)}
+    <div class="ending-title">修行、失敗</div>
+    <div class="result-text">
+      評判は地に落ちた。最後に訪れた${lastChar}は肩をすくめてこう言った。「残念だが、ここまでのようだな」。<br><br>
+      店の暖簾は静かに下ろされ、あなたは仙界へと連れ戻されていく……店主としての修行は、ここで幕を閉じた。
+    </div>
+    <button class="primary" onclick="renderTitle()">もう一度挑む</button>
+  </div></div>`;
+}
+
+function renderEnding(){
+  // find highest satisfaction
+  let bestChar = state.rounds[0].char;
+  let bestVal = -1;
+  state.rounds.forEach(rd=>{
+    const v = state.satisfaction[rd.char.id];
+    if(v>bestVal){ bestVal=v; bestChar=rd.char; }
+  });
+  let tierText;
+  if(state.rep<=2){
+    tierText = `店の評判はぎりぎりのところで踏みとどまった。仙界へ戻る道すがら、${bestChar.name}は「危なっかしい店だったが、憎めなかったな」と笑う。あなたは前途多難ながらも、また修行の続きへと向かうことになる。`;
+  } else if(state.rep===3){
+    tierText = `店の評判はまずまずだった。${bestChar.name}は「悪くない店だった」と満足げに頷き、あなたは次なる修行の地へと静かに旅立っていく。`;
+  } else {
+    tierText = `店の評判は大いに高まった。${bestChar.name}は「これほどの店主、他では見られぬ」と誇らしげに笑い、あなたは仙界でも一目置かれる存在として迎え入れられる。`;
+  }
+  app.innerHTML = `
+  <div class="scroll"><div class="scroll-inner">
+    ${shopHeaderHTML(state.rep)}
+    <div class="ending-title">五人目を送り出して</div>
+    <div class="result-text">${bestChar.fetch}</div>
+    <div class="fact-box">
+      <div class="fact-label">奇縁堂の結末</div>
+      <div class="fact-text">${tierText}</div>
+    </div>
+    <button class="primary" onclick="renderTitle()">もう一度、店を開ける</button>
+  </div></div>`;
+}
+
+/* ===================== ACTIONS ===================== */
+function startGame(){
+  newGame();
+  renderRound();
+}
+
+let pendingIdx = null;
+function chooseItem(idx){
+  pendingIdx = idx;
+  const r = state.rounds[state.round];
+  const it = r.ep.items[idx];
+  state.rep = Math.max(0, Math.min(5, state.rep + it.rep));
+  state.satisfaction[r.char.id] = it.sat;
+  renderResult(idx);
+}
+
+function proceedAfterResult(){
+  if(state.rep<=0){
+    renderGameOver();
+    return;
+  }
+  state.round++;
+  if(state.round>=state.rounds.length){
+    renderEnding();
+  } else {
+    renderRound();
+  }
+}
+
+/* init */
+renderTitle();
+</script>
+</body>
+</html>
